@@ -167,12 +167,12 @@ export default class Match {
 
     private calculateWinner() {
         const winners = this.players.map((p,i) => {
-            return { p: p, 
-                i: i, 
+            return { player: p, 
+                index: i, 
                 points: p.stack.map(c => c.type).reduce((a,b) => a + Card.getPoints(b), 0)
             }
         }).sort((a,b) => b.points-a.points)
-        console.log(`${winners[0].p.username} -> ${winners[0].points}`)
+        console.log(`${winners[0].player.username} -> ${winners[0].points}`)
         this.matchState = MatchState.ENDED
         if (this.handlers["matchWon"] != null)
             this.handlers["matchWon"](winners)

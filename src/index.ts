@@ -112,6 +112,14 @@ match.addHandler("matchStarted", (trumpCard: Card) => {
 
 match.addHandler("matchWon", (winners: any) => {
     announce(`And the winner is ${winners[0].p.username}!`)
+    broadcastToAll(JSON.stringify({
+        type: "matchEnded",
+        winners: winners
+    }))
+    broadcastToAll(JSON.stringify({
+        type: "state",
+        state: match.matchState
+    }))
 })
 
 function broadcastToAll(message: any) {
