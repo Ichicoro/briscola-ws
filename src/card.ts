@@ -83,6 +83,15 @@ export class Card {
             "bastoni"
         ][sign]
     }
+    
+    static getSignEmoji(sign: CardSign) {
+        return [
+            "💰",
+            "⚔",
+            "🥤",
+            "🥢"
+        ][sign]
+    }
 
     getCardName() {
         const num = Card.getTypeName(this.type)
@@ -91,6 +100,7 @@ export class Card {
     }
 
     static getCardName(card: any) {
+        if (card == null) return ""
         // console.log(card)
         const num = Card.getTypeName(card.type)
         const seme = Card.getSignName(card.sign)

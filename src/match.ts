@@ -30,6 +30,8 @@ export default class Match {
         this.matchState = MatchState.PLAYING
         this.shuffleDeck()
         this.dealCards()
+        if (this.handlers["matchStarted"] != null)
+            this.handlers["matchStarted"](this.deck[this.deck.length-1])
     }
 
     addHandler(event: string, handler: Function) {
@@ -43,6 +45,7 @@ export default class Match {
 
     addPlayer(player: Player) {
         if (this.players.length >= 4) return;
+        if (this.players.map(p => p.username).indexOf(player.username) != -1) return;
         this.players.push(player)
 
         if (this.handlers["addPlayer"] != null)
@@ -69,6 +72,10 @@ export default class Match {
         console.log(`hand after: ${player.hand.map(c => c.getCardName())}`)
         if (this.handlers["removeCard"] != null)
             this.handlers["removeCard"](card, player)
+    }
+
+    getNextPlayer() {
+        return this.players[this.table.length] || this.players[0]
     }
 
     playCard(card: Card, player: Player) {
@@ -137,7 +144,8 @@ export default class Match {
         if (this.handlers["checkTable"] != null)
             this.handlers["checkTable"]({
                 player: this.players[winnerPos],
-                card: winner
+                card: winner,
+                tableCards: this.table
             })
 
         this.players[winnerPos].stack = this.players[winnerPos].stack.concat(this.table)
@@ -148,6 +156,10 @@ export default class Match {
                 this.players.unshift(this.players.pop())
             }
             this.dealCards()
+        } else if (this.players.map(p => p.hand).some(h => h.length > 0)) {
+            for (let i = winnerPos; i<this.players.length; i++) {
+                this.players.unshift(this.players.pop())
+            }
         } else {
             this.calculateWinner()
         } 
@@ -155,15 +167,15 @@ export default class Match {
 
     private calculateWinner() {
         const winners = this.players.map((p,i) => {
-            return {p: p, 
+            return { p: p, 
                 i: i, 
                 points: p.stack.map(c => c.type).reduce((a,b) => a + Card.getPoints(b), 0)
             }
         }).sort((a,b) => b.points-a.points)
         console.log(`${winners[0].p.username} -> ${winners[0].points}`)
         this.matchState = MatchState.ENDED
-        if (this.handlers["win"] != null)
-            this.handlers["win"](winners)
+        if (this.handlers["matchWon"] != null)
+            this.handlers["matchWon"](winners)
     }
 
     dealCards() {
@@ -212,7 +224,8 @@ export default class Match {
     }
 
     getTrumpSign() {
-        return this.trumpCard.sign
+        console.log(this.trumpCard)
+        return this.trumpCard?.sign || null
         return this.deck[this.deck.length-1].sign
     }
 }
