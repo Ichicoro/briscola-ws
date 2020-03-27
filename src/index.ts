@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 import Match from './match';
+import { MatchState } from './match';
 import { Player } from './player';
 import { Card } from './card';
 
@@ -82,9 +83,9 @@ match.addHandler("removeCard", (card: Card, player: Player) => {
 })
 
 match.addHandler("checkTable", ({ player, card, tableCards }: any) => {
-    setTimeout(() => {
-        spPair.map(p => p.ws).forEach(ws => ws.send(JSON.stringify({ type: "clearTable" })))
-    }, 1500)
+    // setTimeout(() => {
+    spPair.map(p => p.ws).forEach(ws => ws.send(JSON.stringify({ type: "clearTable" })))
+    // }, 1500)
     announce(`${player.username} has won the round!`)
     const winnerSpPair = spPair.filter((pair: { username: any; }) => pair.username == player.username)[0] || null
     if (winnerSpPair == null) { return }
@@ -111,7 +112,7 @@ match.addHandler("matchStarted", (trumpCard: Card) => {
 })
 
 match.addHandler("matchWon", (winners: any) => {
-    announce(`And the winner is ${winners[0].p.username}!`)
+    announce(`And the winner is ${winners[0].username}!`)
     broadcastToAll(JSON.stringify({
         type: "matchEnded",
         winners: winners
@@ -167,6 +168,15 @@ function resetClientState(ws: WebSocket) {
 function sendCurrentState(ws: WebSocket) {
     const username: string = getUsernameByWS(ws)
     if (username == null) return -1
+
+    if (match.matchState === MatchState.ENDED) {
+        ws.send(JSON.stringify({
+            type: "matchEnded",
+            winners: match.winners
+        }))
+        return
+    }
+
     for (const card of match.getPlayer(username).hand) {
         ws.send(JSON.stringify({
             type: "dealtCard",
@@ -228,14 +238,18 @@ function handleMessage(message: WebSocket.Data, request: IncomingMessage, ws: We
             pl[0].ws = ws
             sendCurrentState(ws)
         } else {
-            spPair.push({username: jsonMessage.username, ws: ws})
-            match.addPlayer(new Player(jsonMessage.username))
-            broadcastToAll(JSON.stringify({
-                type: "setPlayerList",
-                playerList: match.players
-            }))
-            sendCurrentState(ws)
-            console.log("New player joined!")
+            if (match.matchState === MatchState.NOT_STARTED) {
+                spPair.push({username: jsonMessage.username, ws: ws})
+                match.addPlayer(new Player(jsonMessage.username))
+                broadcastToAll(JSON.stringify({
+                    type: "setPlayerList",
+                    playerList: match.players
+                }))
+                sendCurrentState(ws)
+                console.log("New player joined!")
+            } else {
+                ws.close(501, "match_in_progress")
+            }
         }
         announce(`${jsonMessage.username} has ${pl.length ? "re" : ""}joined!`)
     } else if (jsonMessage.type == "start") {

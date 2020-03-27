@@ -1,7 +1,7 @@
 import { CardSign, Card, CardType } from './card'
 import { Player } from './player'
 
-enum MatchState {
+export enum MatchState {
     NOT_STARTED,
     PLAYING,
     ENDED
@@ -18,6 +18,7 @@ export default class Match {
     table: Card[] = []
     matchState: MatchState = MatchState.NOT_STARTED
     handlers: HandlerList = {}
+    winners: unknown = null
     
     constructor(players: Player[] = null) {
         if (players == null || players.length > 4) { return null }
@@ -167,13 +168,14 @@ export default class Match {
 
     private calculateWinner() {
         const winners = this.players.map((p,i) => {
-            return { player: p, 
+            return { ...p, 
                 index: i, 
                 points: p.stack.map(c => c.type).reduce((a,b) => a + Card.getPoints(b), 0)
             }
         }).sort((a,b) => b.points-a.points)
-        console.log(`${winners[0].player.username} -> ${winners[0].points}`)
+        console.log(`${winners[0].username} -> ${winners[0].points}`)
         this.matchState = MatchState.ENDED
+        this.winners = winners
         if (this.handlers["matchWon"] != null)
             this.handlers["matchWon"](winners)
     }
@@ -215,6 +217,7 @@ export default class Match {
         }
         this.deck.sort(() => Math.random() - 0.5);
         console.log("Cards: ")
+        this.deck = this.deck.splice(-12);
         this.deck.forEach((card,i) => {
             console.log(card.getCardName() + " - " + (i+1))
         });
