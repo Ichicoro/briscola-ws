@@ -217,7 +217,6 @@ export default class Match {
         }
         this.deck.sort(() => Math.random() - 0.5);
         console.log("Cards: ")
-        this.deck = this.deck.splice(-12);
         this.deck.forEach((card,i) => {
             console.log(card.getCardName() + " - " + (i+1))
         });
