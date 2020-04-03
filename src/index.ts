@@ -9,6 +9,8 @@ import fs from 'fs';
 import _ from 'lodash';
 import { IncomingMessage } from 'http';
 
+
+
 // const server = https.createServer({
 //     cert: fs.readFileSync('certs/cert.pem'),
 //     key: fs.readFileSync('certs/key.pem')
@@ -127,8 +129,21 @@ function broadcastToAll(message: any) {
     spPair.map(p => p.ws).forEach(ws => ws.send(message))
 }
 
-
-const wss = new WebSocket.Server({ port: 777 });
+let wss, server;
+if (process.env.NODE_ENV == "prod") {
+    server = https.createServer({
+        cert: fs.readFileSync('./certs/cert.pem'),
+        key: fs.readFileSync('./certs/key.pem')
+    });
+    wss = new WebSocket.Server({
+        port: 1777,
+        server: server
+    });
+} else {
+    wss = new WebSocket.Server({
+        port: 1777
+    });
+}
 
 function announce(message: String) {
     for (const item of spPair) {
@@ -285,3 +300,6 @@ wss.on('connection', function connection(ws, req) {
 });
 
 console.log("ready")
+
+if (process.env.NODE_ENV == "prod")
+    server.listen(1777)
