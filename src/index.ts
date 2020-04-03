@@ -136,7 +136,7 @@ if (process.env.NODE_ENV == "prod") {
         key: fs.readFileSync('./certs/key.pem')
     });
     wss = new WebSocket.Server({
-        port: 1777,
+        // port: 1777,
         server: server
     });
 } else {
