@@ -86,9 +86,13 @@ match.addHandler("removeCard", (card: Card, player: Player) => {
 
 match.addHandler("checkTable", ({ player, card, tableCards }: any) => {
     // setTimeout(() => {
-    spPair.map(p => p.ws).forEach(ws => ws.send(JSON.stringify({ type: "clearTable" })))
+    broadcastToAll(JSON.stringify({ type: "clearTable" }))
     // }, 1500)
     announce(`${player.username} has won the round!`)
+    broadcastToAll(JSON.stringify({
+        type: "nextPlayer",
+        nextPlayer: player.username
+    }))
     const winnerSpPair = spPair.filter((pair: { username: any; }) => pair.username == player.username)[0] || null
     if (winnerSpPair == null) { return }
     winnerSpPair.ws.send(JSON.stringify({

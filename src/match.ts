@@ -107,7 +107,7 @@ export default class Match {
                 card: card,
                 byPlayer: player,
                 table: this.table,
-                nextPlayer: (this.players[this.table.length] || this.players[0])
+                nextPlayer: this.getNextPlayer()
             })
         }
 
