@@ -85,9 +85,8 @@ match.addHandler("removeCard", (card: Card, player: Player) => {
 })
 
 match.addHandler("checkTable", ({ player, card, tableCards }: any) => {
-    // setTimeout(() => {
     broadcastToAll(JSON.stringify({ type: "clearTable" }))
-    // }, 1500)
+
     announce(`${player.username} has won the round!`)
     broadcastToAll(JSON.stringify({
         type: "nextPlayer",
@@ -267,7 +266,7 @@ function handleMessage(message: WebSocket.Data, request: IncomingMessage, ws: We
                 sendCurrentState(ws)
                 console.log("New player joined!")
             } else {
-                ws.close(501, "match_in_progress")
+                ws.close(4001, "match_in_progress")
             }
         }
         announce(`${jsonMessage.username} has ${pl.length ? "re" : ""}joined!`)
