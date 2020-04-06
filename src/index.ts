@@ -252,9 +252,9 @@ function handleMessage(message: WebSocket.Data, request: IncomingMessage, ws: We
     if (jsonMessage.type == "connect") {
         const pl = spPair.filter((pair: any) => pair.username == jsonMessage.username)
         if (pl.length != 0) {
-            console.log(`${pl[0].username} has rejoined!`)
             pl[0].ws = ws
             sendCurrentState(ws)
+            console.log(`${pl[0].username} has rejoined!`)
         } else {
             if (match.matchState === MatchState.NOT_STARTED) {
                 spPair.push({username: jsonMessage.username, ws: ws})
@@ -268,8 +268,8 @@ function handleMessage(message: WebSocket.Data, request: IncomingMessage, ws: We
             } else {
                 ws.close(4001, "match_in_progress")
             }
+            announce(`${jsonMessage.username} has ${pl.length ? "re" : ""}joined!`)
         }
-        announce(`${jsonMessage.username} has ${pl.length ? "re" : ""}joined!`)
     } else if (jsonMessage.type == "start") {
         match.start()
         // match.playCard(match.players.filter(p => p.username == "oof")[0].hand[0], match.players[0])
