@@ -22,7 +22,7 @@
     "@types/lodash": "^4.14.149",
     "@types/node": "^12.7.2",
     "@types/ws": "^6.0.3",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "typescript": "^3.6.2",
     "ws": "^7.1.2"
   }
